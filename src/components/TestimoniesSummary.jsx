@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 function TestimoniesSummary() {
-    const [testimonies, setTestimonies] = useState([]);
+    const [testimony, setTestimonies] = useState([]);
 
     useEffect(() => {
         // For now, we'll use mock data. Replace this with actual data fetching later.
@@ -30,7 +30,7 @@ function TestimoniesSummary() {
         <div className="mb-8">
             <h3 className="text-xl font-semibold mb-4">Testimonies Summary</h3>
             <div className="space-y-4">
-                {testimonies.map((item) => (
+                {testimony.map((item) => (
                     <div key={item.id} className="p-4 bg-white rounded shadow">
                         <p className="font-semibold">{item.name}</p>
                         <p className="text-gray-700">{item.testimony}</p>
