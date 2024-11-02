@@ -6,32 +6,44 @@ import ActionableInsights from "../components/ActionableInsights";
 
 function Results() {
     const location = useLocation();
-    const { age, weight, medicalHistory } = location.state || {};
-    const [
-        mostCommonSideEffectsProbabilities,
-        setMostCommonSideEffectsProbabilities,
-    ] = useState([]);
-    const [
-        mostSevereSideEffectsProbabilities,
-        setMostSevereSideEffectsProbabilities,
-    ] = useState([]);
+    const { age, weight, ethnicity } = location.state || {};
+    const [dashboardData, setDashboardData] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Generate random probabilities for demonstration purposes
-        setMostCommonSideEffectsProbabilities([
-            { label: "Side Effect A", value: Math.random() * 100 },
-            { label: "Side Effect B", value: Math.random() * 100 },
-            { label: "Side Effect C", value: Math.random() * 100 },
-            { label: "Side Effect D", value: Math.random() * 100 },
-        ]);
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(
+                    `http://127.0.0.1:5050/dashboard?age=${age}&weight=${weight}&ethnicity=${ethnicity}`
+                );
 
-        setMostSevereSideEffectsProbabilities([
-            { label: "Side Effect A", value: Math.random() * 100 },
-            { label: "Side Effect B", value: Math.random() * 100 },
-            { label: "Side Effect C", value: Math.random() * 100 },
-            { label: "Side Effect D", value: Math.random() * 100 },
-        ]);
-    }, []);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(
+                        `HTTP error! status: ${response.status}, response: ${errorText}`
+                    );
+                }
+                const data = await response.json();
+                setDashboardData(data);
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                setError(error.message);
+            }
+        }
+
+        fetchDashboardData();
+    }, [age, weight, ethnicity]);
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+
+    if (!dashboardData) {
+        return <div>Loading...</div>;
+    }
+
+    const { patient_info, probabilities, testimony, actionable_insights } =
+        dashboardData;
 
     return (
         <div className="min-h-screen bg-gray-100 p-8">
@@ -42,30 +54,28 @@ function Results() {
                 <h3 className="text-xl font-semibold mb-2">
                     Patient Information:
                 </h3>
-                <p>Age: {age}</p>
-                <p>Weight: {weight} kg</p>
-                <p>Medical History: {medicalHistory}</p>
+                <p>Age: {patient_info.age}</p>
+                <p>Weight: {patient_info.weight} kg</p>
+                <p>Ethnicity: {patient_info.ethnicity}</p>
             </div>
 
             {/* Most Common Side Effects */}
             <SideEffectBarChart
                 title="Most Common Reported Side Effects:"
-                data={mostCommonSideEffectsProbabilities}
+                data={Object.entries(probabilities.most_common).map(
+                    ([key, value]) => ({
+                        label: key,
+                        value: value.vomiting * 100, // Assuming you want to show vomiting probability
+                    })
+                )}
                 barColor="bg-blue-500"
             />
 
-            {/* Most Severe Side Effects */}
-            <SideEffectBarChart
-                title="Most Severe Reported Side Effects:"
-                data={mostSevereSideEffectsProbabilities}
-                barColor="bg-red-500"
-            />
-
             {/* Testimonies Summary */}
-            <TestimoniesSummary />
+            <TestimoniesSummary testimony={testimony} />
 
             {/* Actionable Insights */}
-            <ActionableInsights />
+            <ActionableInsights insights={actionable_insights} />
         </div>
     );
 }
