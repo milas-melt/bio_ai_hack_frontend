@@ -5,6 +5,8 @@ import TestimoniesSummary from "../components/TestimoniesSummary";
 import ActionableInsights from "../components/ActionableInsights";
 
 function Results() {
+    const API_BASE_URL =
+        process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
     const location = useLocation();
     const { age, weight, sex, ethnicity } = location.state || {};
     const [dashboardData, setDashboardData] = useState(null);
@@ -21,7 +23,7 @@ function Results() {
                 });
 
                 const response = await fetch(
-                    `http://127.0.0.1:5050/dashboard?${queryParams.toString()}`,
+                    `${API_BASE_URL}/dashboard?${queryParams.toString()}`,
                     {
                         method: "GET",
                         headers: {
