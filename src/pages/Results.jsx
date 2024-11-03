@@ -11,6 +11,7 @@ function Results() {
     const { age, weight, sex, ethnicity } = location.state || {};
     const [dashboardData, setDashboardData] = useState(null);
     const [error, setError] = useState(null);
+    const [selectedAttribute, setSelectedAttribute] = useState("age");
 
     useEffect(() => {
         async function fetchDashboardData() {
@@ -83,6 +84,25 @@ function Results() {
         }));
     }
 
+    // Extract attribute options, excluding "age weight sex"
+    const attributeOptions = mostCommon
+        .map((entry) => entry[0])
+        .filter((attr) => attr !== "age weight sex");
+
+    // Find data for the selected attribute
+    const selectedAttributeEntry = mostCommon.find(
+        (entry) => entry[0] === selectedAttribute
+    );
+
+    let attributeSideEffectData = [];
+    if (selectedAttributeEntry && selectedAttributeEntry.length > 1) {
+        const reactions = selectedAttributeEntry[1];
+        attributeSideEffectData = reactions.map((item) => ({
+            label: item[0],
+            value: item[1],
+        }));
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 p-8">
             <h2 className="text-3xl font-bold mb-6">Analysis Results</h2>
@@ -108,6 +128,41 @@ function Results() {
             ) : (
                 <p>No side effects data available.</p>
             )}
+
+            {/* Advanced Diagnostic Section */}
+            <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">
+                    Advanced Diagnostic
+                </h3>
+                <div className="flex border-b mb-4">
+                    {attributeOptions.map((attribute) => (
+                        <button
+                            key={attribute}
+                            onClick={() => setSelectedAttribute(attribute)}
+                            className={`mr-4 pb-2 focus:outline-none ${
+                                selectedAttribute === attribute
+                                    ? "border-b-2 border-blue-500 text-blue-500"
+                                    : "text-gray-500 hover:text-blue-500"
+                            }`}
+                        >
+                            {attribute.charAt(0).toUpperCase() +
+                                attribute.slice(1)}
+                        </button>
+                    ))}
+                </div>
+                {attributeSideEffectData.length > 0 ? (
+                    <SideEffectBarChart
+                        title={`Side Effects for ${
+                            selectedAttribute.charAt(0).toUpperCase() +
+                            selectedAttribute.slice(1)
+                        }`}
+                        data={attributeSideEffectData}
+                        barColor="bg-green-500"
+                    />
+                ) : (
+                    <p>No data available for {selectedAttribute}.</p>
+                )}
+            </div>
 
             {/* Additional components if needed */}
             {/* <TestimoniesSummary data={testimony} /> */}
