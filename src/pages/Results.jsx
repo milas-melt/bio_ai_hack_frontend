@@ -12,7 +12,7 @@ function Results() {
     const [dashboardData, setDashboardData] = useState(null);
     const [error, setError] = useState(null);
     const [selectedAttribute, setSelectedAttribute] = useState("age");
-    const [showAdvancedDiagnostic, setShowAdvancedDiagnostic] = useState(false); // New state variable
+    const [showAdvancedDiagnostic, setShowAdvancedDiagnostic] = useState(false);
 
     useEffect(() => {
         async function fetchDashboardData() {
@@ -143,41 +143,45 @@ function Results() {
             </button>
 
             {/* Advanced Diagnostic Section */}
-            {showAdvancedDiagnostic && (
-                <div className="mb-8">
-                    <h3 className="text-xl font-semibold mb-4">
-                        Advanced Diagnostic
-                    </h3>
-                    <div className="flex border-b mb-4">
-                        {attributeOptions.map((attribute) => (
-                            <button
-                                key={attribute}
-                                onClick={() => setSelectedAttribute(attribute)}
-                                className={`mr-4 pb-2 focus:outline-none ${
-                                    selectedAttribute === attribute
-                                        ? "border-b-2 border-blue-500 text-blue-500"
-                                        : "text-gray-500 hover:text-blue-500"
-                                }`}
-                            >
-                                {attribute.charAt(0).toUpperCase() +
-                                    attribute.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    {attributeSideEffectData.length > 0 ? (
-                        <SideEffectBarChart
-                            title={`Side Effects for ${
-                                selectedAttribute.charAt(0).toUpperCase() +
-                                selectedAttribute.slice(1)
+            <div
+                className={`mb-8 overflow-hidden transition-all duration-500 ease-in-out ${
+                    showAdvancedDiagnostic
+                        ? "max-h-screen opacity-100 delay-200"
+                        : "max-h-0 opacity-0 delay-200"
+                }`}
+            >
+                <h3 className="text-xl font-semibold mb-4">
+                    Advanced Diagnostic
+                </h3>
+                <div className="flex border-b mb-4">
+                    {attributeOptions.map((attribute) => (
+                        <button
+                            key={attribute}
+                            onClick={() => setSelectedAttribute(attribute)}
+                            className={`mr-4 pb-2 focus:outline-none ${
+                                selectedAttribute === attribute
+                                    ? "border-b-2 border-blue-500 text-blue-500"
+                                    : "text-gray-500 hover:text-blue-500"
                             }`}
-                            data={attributeSideEffectData}
-                            barColor="bg-green-500"
-                        />
-                    ) : (
-                        <p>No data available for {selectedAttribute}.</p>
-                    )}
+                        >
+                            {attribute.charAt(0).toUpperCase() +
+                                attribute.slice(1)}
+                        </button>
+                    ))}
                 </div>
-            )}
+                {attributeSideEffectData.length > 0 ? (
+                    <SideEffectBarChart
+                        title={`Side Effects for ${
+                            selectedAttribute.charAt(0).toUpperCase() +
+                            selectedAttribute.slice(1)
+                        }`}
+                        data={attributeSideEffectData}
+                        barColor="bg-green-500"
+                    />
+                ) : (
+                    <p>No data available for {selectedAttribute}.</p>
+                )}
+            </div>
 
             {/* Additional components if needed */}
             {/* <TestimoniesSummary data={testimony} /> */}
