@@ -12,6 +12,7 @@ function Results() {
     const [dashboardData, setDashboardData] = useState(null);
     const [error, setError] = useState(null);
     const [selectedAttribute, setSelectedAttribute] = useState("age");
+    const [showAdvancedDiagnostic, setShowAdvancedDiagnostic] = useState(false); // New state variable
 
     useEffect(() => {
         async function fetchDashboardData() {
@@ -129,40 +130,54 @@ function Results() {
                 <p>No side effects data available.</p>
             )}
 
+            {/* Toggle Button for Advanced Diagnostic */}
+            <button
+                onClick={() =>
+                    setShowAdvancedDiagnostic(!showAdvancedDiagnostic)
+                }
+                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
+            >
+                {showAdvancedDiagnostic
+                    ? "Hide Advanced Diagnostic"
+                    : "Show Advanced Diagnostic"}
+            </button>
+
             {/* Advanced Diagnostic Section */}
-            <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                    Advanced Diagnostic
-                </h3>
-                <div className="flex border-b mb-4">
-                    {attributeOptions.map((attribute) => (
-                        <button
-                            key={attribute}
-                            onClick={() => setSelectedAttribute(attribute)}
-                            className={`mr-4 pb-2 focus:outline-none ${
-                                selectedAttribute === attribute
-                                    ? "border-b-2 border-blue-500 text-blue-500"
-                                    : "text-gray-500 hover:text-blue-500"
+            {showAdvancedDiagnostic && (
+                <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4">
+                        Advanced Diagnostic
+                    </h3>
+                    <div className="flex border-b mb-4">
+                        {attributeOptions.map((attribute) => (
+                            <button
+                                key={attribute}
+                                onClick={() => setSelectedAttribute(attribute)}
+                                className={`mr-4 pb-2 focus:outline-none ${
+                                    selectedAttribute === attribute
+                                        ? "border-b-2 border-blue-500 text-blue-500"
+                                        : "text-gray-500 hover:text-blue-500"
+                                }`}
+                            >
+                                {attribute.charAt(0).toUpperCase() +
+                                    attribute.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    {attributeSideEffectData.length > 0 ? (
+                        <SideEffectBarChart
+                            title={`Side Effects for ${
+                                selectedAttribute.charAt(0).toUpperCase() +
+                                selectedAttribute.slice(1)
                             }`}
-                        >
-                            {attribute.charAt(0).toUpperCase() +
-                                attribute.slice(1)}
-                        </button>
-                    ))}
+                            data={attributeSideEffectData}
+                            barColor="bg-green-500"
+                        />
+                    ) : (
+                        <p>No data available for {selectedAttribute}.</p>
+                    )}
                 </div>
-                {attributeSideEffectData.length > 0 ? (
-                    <SideEffectBarChart
-                        title={`Side Effects for ${
-                            selectedAttribute.charAt(0).toUpperCase() +
-                            selectedAttribute.slice(1)
-                        }`}
-                        data={attributeSideEffectData}
-                        barColor="bg-green-500"
-                    />
-                ) : (
-                    <p>No data available for {selectedAttribute}.</p>
-                )}
-            </div>
+            )}
 
             {/* Additional components if needed */}
             {/* <TestimoniesSummary data={testimony} /> */}
