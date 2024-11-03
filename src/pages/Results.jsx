@@ -6,33 +6,43 @@ import ActionableInsights from "../components/ActionableInsights";
 
 function Results() {
     const location = useLocation();
-    const { age, weight, ethnicity } = location.state || {};
+    const { age, weight, sex, ethnicity } = location.state || {};
     const [dashboardData, setDashboardData] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         async function fetchDashboardData() {
             try {
+                const queryParams = new URLSearchParams({
+                    age,
+                    weight,
+                    sex,
+                    ethnicity,
+                });
+
                 const response = await fetch(
-                    `http://127.0.0.1:5050/dashboard?age=${age}&weight=${weight}&ethnicity=${ethnicity}`
+                    `http://127.0.0.1:5050/dashboard?${queryParams.toString()}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
                 );
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(
-                        `HTTP error! status: ${response.status}, response: ${errorText}`
-                    );
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
                 const data = await response.json();
                 setDashboardData(data);
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
                 setError(error.message);
             }
         }
 
         fetchDashboardData();
-    }, [age, weight, ethnicity]);
+    }, [age, weight, sex, ethnicity]);
 
     if (error) {
         return <div>Error: {error}</div>;
@@ -45,6 +55,24 @@ function Results() {
     const { patient_info, probabilities, testimony, actionable_insights } =
         dashboardData;
 
+    // Extract the "most_common" array
+    const mostCommon = probabilities.most_common;
+
+    // Find the entry with the key "age weight sex"
+    const jointReactionsEntry = mostCommon.find(
+        (entry) => entry[0] === "age weight sex"
+    );
+
+    // Map the reactions data to the format expected by SideEffectBarChart
+    let sideEffectData = [];
+    if (jointReactionsEntry && jointReactionsEntry.length > 1) {
+        const jointRelatedReactions = jointReactionsEntry[1]; // This is the reactions data
+        sideEffectData = jointRelatedReactions.map((item) => ({
+            label: item[0], // Reaction name
+            value: item[1], // Probability
+        }));
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 p-8">
             <h2 className="text-3xl font-bold mb-6">Analysis Results</h2>
@@ -56,26 +84,24 @@ function Results() {
                 </h3>
                 <p>Age: {patient_info.age}</p>
                 <p>Weight: {patient_info.weight} kg</p>
+                <p>Sex: {patient_info.sex}</p>
                 <p>Ethnicity: {patient_info.ethnicity}</p>
             </div>
 
             {/* Most Common Side Effects */}
-            <SideEffectBarChart
-                title="Most Common Reported Side Effects:"
-                data={Object.entries(probabilities.most_common).map(
-                    ([key, value]) => ({
-                        label: key,
-                        value: value.vomiting * 100, // Assuming you want to show vomiting probability
-                    })
-                )}
-                barColor="bg-blue-500"
-            />
+            {sideEffectData.length > 0 ? (
+                <SideEffectBarChart
+                    title="Most Common Side Effects"
+                    data={sideEffectData}
+                    barColor="bg-blue-500"
+                />
+            ) : (
+                <p>No side effects data available.</p>
+            )}
 
-            {/* Testimonies Summary */}
-            <TestimoniesSummary testimony={testimony} />
-
-            {/* Actionable Insights */}
-            <ActionableInsights insights={actionable_insights} />
+            {/* Additional components if needed */}
+            {/* <TestimoniesSummary data={testimony} /> */}
+            {/* <ActionableInsights data={actionable_insights} /> */}
         </div>
     );
 }

@@ -9,12 +9,12 @@ function SideEffectBarChart({ title, data, barColor }) {
                     <div key={index}>
                         <div className="flex justify-between mb-1">
                             <span>{prob.label}</span>
-                            <span>{prob.value.toFixed(2)}%</span>
+                            <span>{prob.value.toFixed(2) * 100}%</span>
                         </div>
                         <div className="w-full bg-gray-300 rounded h-6">
                             <div
                                 className={`h-6 rounded ${barColor}`}
-                                style={{ width: `${prob.value}%` }}
+                                style={{ width: `${prob.value * 100}%` }}
                             ></div>
                         </div>
                     </div>

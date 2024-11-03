@@ -7,6 +7,7 @@ function Home() {
         age: "",
         weight: "",
         medicalHistory: "",
+        sex: "",
     });
 
     const navigate = useNavigate();
@@ -52,6 +53,20 @@ function Home() {
                         className="mt-1 p-2 w-full border rounded"
                         required
                     />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-gray-700">Sex:</label>
+                    <select
+                        name="sex"
+                        value={formData.sex}
+                        onChange={handleChange}
+                        className="mt-1 p-2 w-full border rounded"
+                        required
+                    >
+                        <option value="">Select</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
                 </div>
                 <div className="mb-6">
                     <label className="block text-gray-700">
